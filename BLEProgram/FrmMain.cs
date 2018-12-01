@@ -16,20 +16,18 @@ using Windows.Storage.Streams;
 
 namespace BLEProgram
 {
-    public partial class Form1 : Form
+    public partial class FrmMain : Form
     {
         Guid serviceUUID = BluetoothUuidHelper.FromShortId(0xffe5);
         Guid charUUID = BluetoothUuidHelper.FromShortId(0xffe9);
+
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
 
-        public Form1()
+        public FrmMain()
         {
             InitializeComponent();
-            bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+            CheckForIllegalCrossThreadCalls = false;
             bleWatcher.Received += bleWatcher_Received;
-
-            bleWatcher.Start();
-
         }
 
         private void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
@@ -67,7 +65,7 @@ namespace BLEProgram
             var charRes = await service.GetCharacteristicsForUuidAsync(charUUID);
             var chars = charRes.Characteristics[0];
 
-            await SendData(chars, dataText.Text);
+            await SendData(chars, DataText.Text);
         }
 
         private byte[] StrToByteArray(string data)
@@ -82,7 +80,7 @@ namespace BLEProgram
             return bl.ToArray();
         }
 
-        private void exitToolStrip_Click(object sender, EventArgs e)
+        private void ExitToolStrip_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show("Are you exit now?", "BLEProgram", MessageBoxButtons.YesNo);
             switch (result)
@@ -93,6 +91,18 @@ namespace BLEProgram
                 case DialogResult.No:
                     break;
             }
+        }
+
+        private void FrmMain_Load(object sender, EventArgs e)
+        {
+            bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+
+            bleWatcher.Start();
+        }
+
+        private void StartBtn_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
