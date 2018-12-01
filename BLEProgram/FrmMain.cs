@@ -23,6 +23,8 @@ namespace BLEProgram
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
 
+        ulong bleAddr;
+
         public FrmMain()
         {
             InitializeComponent();
@@ -42,30 +44,41 @@ namespace BLEProgram
 
                 bleWatcher.Stop();
 
-                ConnectBluetoothDevice(eventArgs.BluetoothAddress);
+                bleAddr = eventArgs.BluetoothAddress;
+                ConnectBluetoothDevice(bleAddr);
             }
         }
 
-        private async Task SendData(GattCharacteristic gattChar, string reqData)
+        private async Task SendData(string reqData)
         {
+            var leDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
+
+            var serviceRes = await leDevice.GetGattServicesForUuidAsync(serviceUUID);
+            var service = serviceRes.Services[0];
+
+            var charRes = await service.GetCharacteristicsForUuidAsync(charUUID);
+            var chars = charRes.Characteristics[0];
+
             var writer = new DataWriter();
             var sendData = StrToByteArray(reqData);
 
             writer.WriteBytes(sendData);
 
-            var stat = await gattChar.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+            var stat = await chars.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
             requestList.Items.Add("Send : " + reqData);
         }
 
         private async void ConnectBluetoothDevice(ulong bluetoothAddr)
         {
             var leDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddr);
+
             var serviceRes = await leDevice.GetGattServicesForUuidAsync(serviceUUID);
             var service = serviceRes.Services[0];
+
             var charRes = await service.GetCharacteristicsForUuidAsync(charUUID);
             var chars = charRes.Characteristics[0];
 
-            await SendData(chars, DataText.Text);
+            requestList.Items.Add("Connected!");
         }
 
         private byte[] StrToByteArray(string data)
@@ -100,9 +113,9 @@ namespace BLEProgram
             bleWatcher.Start();
         }
 
-        private void StartBtn_Click(object sender, EventArgs e)
+        private async void StartBtn_Click(object sender, EventArgs e)
         {
-
+            await SendData(DataText.Text);
         }
     }
 }
