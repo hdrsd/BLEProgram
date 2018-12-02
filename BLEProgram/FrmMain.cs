@@ -19,7 +19,7 @@ namespace BLEProgram
 {
     public partial class FrmMain : Form
     {
-        Guid serviceUUID = BluetoothUuidHelper.FromShortId(0xffe5);
+        Guid serviceUUID = BluetoothUuidHelper.FromShortId(0xff58);
         Guid charUUID = BluetoothUuidHelper.FromShortId(0xffe9);
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
