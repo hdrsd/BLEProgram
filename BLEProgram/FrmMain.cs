@@ -63,14 +63,6 @@ namespace BLEProgram
 
         private async Task SendData(string reqData)
         {
-            bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
-
-            serviceRes = await bleDevice.GetGattServicesForUuidAsync(serviceUUID);
-            gattService = serviceRes.Services[0];
-
-            charRes = await gattService.GetCharacteristicsForUuidAsync(charUUID);
-            gattChar = charRes.Characteristics[0];
-
             DataWriter writer = new DataWriter();
             byte[] sendData = StrToByteArray(reqData);
 
