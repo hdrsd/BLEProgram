@@ -22,10 +22,12 @@ namespace BLEProgram
 {
     public partial class FrmMain : Form
     {
-        Guid serviceUUID = BluetoothUuidHelper.FromShortId(0x180D);
-        Guid charUUID = BluetoothUuidHelper.FromShortId(0x2A29);
+        Guid serviceUUID = NrfUuid.RX_SERVICE_UUID;
+        Guid charUUID = NrfUuid.RX_CHAR_UUID;
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
+
+        GattDeviceService gattService;
 
         ulong bleAddr;
 
