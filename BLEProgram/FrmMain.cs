@@ -77,7 +77,11 @@ namespace BLEProgram
         {
             var leDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddr);
             Console.WriteLine("Waiting...");
+
             var serviceRes = await leDevice.GetGattServicesForUuidAsync(serviceUUID);
+
+            Console.WriteLine("ServiceParamSending...");
+
             var service = serviceRes.Services[0];
 
             var charRes = await service.GetCharacteristicsForUuidAsync(charUUID);
