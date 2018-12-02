@@ -15,6 +15,8 @@ using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Devices.Enumeration;
 using Windows.Storage.Streams;
 
+using BLEProgram;
+
 namespace BLEProgram
 {
     public partial class FrmMain : Form
@@ -23,6 +25,8 @@ namespace BLEProgram
         Guid charUUID = BluetoothUuidHelper.FromShortId(0xffe9);
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
+
+        GattDeviceService gattService;
 
         ulong bleAddr;
 
@@ -33,9 +37,30 @@ namespace BLEProgram
             bleWatcher.Received += bleWatcher_Received;
         }
 
-        private void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
+        private async void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
         {
-            var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
+            bool find = false;
+            var bleService = eventArgs.Advertisement.ServiceUuids;
+
+            foreach(var uuid in bleService)
+            {
+                Console.WriteLine(uuid);
+                if(uuid == NrfUuid.RX_SERVICE_UUID)
+                {
+                    bleWatcher.Stop();
+                    BluetoothLEDevice device = await BluetoothLEDevice.FromBluetoothAddressAsync(eventArgs.BluetoothAddress);
+                    gattService = device.GetGattService(NrfUuid.RX_SERVICE_UUID);
+                    find = true;
+                    break;
+                }
+            }
+
+            if (find)
+            {
+
+            }
+
+            /*var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
             int index = -1;
             if(serviceUUIDs.IndexOf(serviceUUID) == index)
             {
@@ -47,7 +72,7 @@ namespace BLEProgram
 
                 bleAddr = eventArgs.BluetoothAddress;
                 ConnectBluetoothDevice(bleAddr);
-            }
+            }*/
         }
 
         private async Task SendData(string reqData)
