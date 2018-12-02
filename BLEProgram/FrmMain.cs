@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,6 +25,7 @@ namespace BLEProgram
     {
         Guid serviceUUID = NrfUuid.RX_SERVICE_UUID;
         Guid charUUID = NrfUuid.RX_CHAR_UUID;
+        Guid txUUID = NrfUuid.TX_CHAR_UUID;
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
         BluetoothLEDevice bleDevice;
@@ -33,6 +35,9 @@ namespace BLEProgram
 
         GattCharacteristicsResult charRes;
         GattCharacteristic gattChar;
+
+        GattCharacteristicsResult txRes;
+        GattCharacteristic txChar;
 
         ulong bleAddr;
 
@@ -50,26 +55,20 @@ namespace BLEProgram
             if(serviceUUIDs.IndexOf(serviceUUID) == index)
             {
                 string strAdd = eventArgs.BluetoothAddress.ToString();
-
                 requestList.Items.Add("Target device : " + strAdd);
 
                 bleWatcher.Stop();
 
                 bleAddr = eventArgs.BluetoothAddress;
 
-                ConnectBluetoothDevice(eventArgs.BluetoothAddress);
+                try
+                {
+                    ConnectBluetoothDevice(eventArgs.BluetoothAddress);
+                }catch(Exception ex)
+                {
+                    MessageBox.Show("연결 실패 : " + ex.ToString());
+                }
             }
-        }
-
-        private async Task SendData(string reqData)
-        {
-            DataWriter writer = new DataWriter();
-            byte[] sendData = StrToByteArray(reqData);
-
-            writer.WriteBytes(sendData);
-
-            GattCommunicationStatus status = await gattChar.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
-            requestList.Items.Add("Send : " + reqData);
         }
 
         private async void ConnectBluetoothDevice(ulong bluetoothAddr)
@@ -83,6 +82,28 @@ namespace BLEProgram
             gattChar = charRes.Characteristics[0];
 
             requestList.Items.Add("Connected!");
+        }
+
+        private async Task SendData(string reqData)
+        {
+            DataWriter writer = new DataWriter();
+            byte[] sendData = StrToByteArray(reqData);
+
+            writer.WriteBytes(sendData);
+
+            GattCommunicationStatus status = await gattChar.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+            requestList.Items.Add("Send : " + reqData);
+
+            txChar.ValueChanged += DataCallback;
+
+            txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
+            txChar = txRes.Characteristics[0];
+        }
+
+        private void DataCallback(GattCharacteristic sender, GattValueChangedEventArgs eventArgs)
+        {
+            requestList.Items.Add("Response : " + Encoding.ASCII.GetString(eventArgs.CharacteristicValue.ToArray()));
+
         }
 
         private byte[] StrToByteArray(string data)
@@ -103,6 +124,7 @@ namespace BLEProgram
             switch (result)
             {
                 case DialogResult.Yes:
+                    bleWatcher.Stop();
                     Application.Exit();
                     break;
                 case DialogResult.No:
