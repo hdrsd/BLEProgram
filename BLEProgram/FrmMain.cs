@@ -101,11 +101,14 @@ namespace BLEProgram
             txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
             txChar = txRes.Characteristics[0];
 
-            var notifyRes = await txChar.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-            if(notifyRes == GattCommunicationStatus.Success)
-            {
-                requestList.Items.Add("Response : " + txChar.ToString());
-            }
+            txChar.ValueChanged += txChar_ValueChanged;
+
+            await txChar.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+        }
+
+        private void txChar_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs eventArgs)
+        {
+            requestList.Items.Add("Response : " + Encoding.ASCII.GetString(eventArgs.CharacteristicValue.ToArray()));
         }
 
         private byte[] StrToByteArray(string data)
