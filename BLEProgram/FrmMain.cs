@@ -26,6 +26,13 @@ namespace BLEProgram
         Guid charUUID = NrfUuid.RX_CHAR_UUID;
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
+        BluetoothLEDevice bleDevice;
+
+        GattDeviceServicesResult serviceRes;
+        GattDeviceService gattService;
+
+        GattCharacteristicsResult charRes;
+        GattCharacteristic gattChar;
 
         ulong bleAddr;
 
@@ -56,36 +63,32 @@ namespace BLEProgram
 
         private async Task SendData(string reqData)
         {
-            var leDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
+            bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
 
-            var serviceRes = await leDevice.GetGattServicesForUuidAsync(serviceUUID);
-            var service = serviceRes.Services[0];
+            serviceRes = await bleDevice.GetGattServicesForUuidAsync(serviceUUID);
+            gattService = serviceRes.Services[0];
 
-            var charRes = await service.GetCharacteristicsForUuidAsync(charUUID);
-            var chars = charRes.Characteristics[0];
+            charRes = await gattService.GetCharacteristicsForUuidAsync(charUUID);
+            gattChar = charRes.Characteristics[0];
 
-            var writer = new DataWriter();
-            var sendData = StrToByteArray(reqData);
+            DataWriter writer = new DataWriter();
+            byte[] sendData = StrToByteArray(reqData);
 
             writer.WriteBytes(sendData);
 
-            var stat = await chars.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+            GattCommunicationStatus status = await gattChar.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
             requestList.Items.Add("Send : " + reqData);
         }
 
         private async void ConnectBluetoothDevice(ulong bluetoothAddr)
         {
-            var leDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddr);
-            Console.WriteLine("Waiting...");
+            bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
 
-            var serviceRes = await leDevice.GetGattServicesForUuidAsync(serviceUUID);
+            serviceRes = await bleDevice.GetGattServicesForUuidAsync(serviceUUID);
+            gattService = serviceRes.Services[0];
 
-            Console.WriteLine("ServiceParamSending...");
-
-            var service = serviceRes.Services[0];
-
-            var charRes = await service.GetCharacteristicsForUuidAsync(charUUID);
-            var chars = charRes.Characteristics[0];
+            charRes = await gattService.GetCharacteristicsForUuidAsync(charUUID);
+            gattChar = charRes.Characteristics[0];
 
             requestList.Items.Add("Connected!");
         }
