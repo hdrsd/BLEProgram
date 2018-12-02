@@ -12,6 +12,7 @@ using Windows;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Bluetooth.Advertisement;
+using Windows.Devices.Enumeration;
 using Windows.Storage.Streams;
 
 namespace BLEProgram
@@ -32,9 +33,17 @@ namespace BLEProgram
             bleWatcher.Received += bleWatcher_Received;
         }
 
-        private void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
+        private async void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
         {
-            var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
+
+            var dev = await BluetoothLEDevice.FromBluetoothAddressAsync(eventArgs.BluetoothAddress);
+
+            DevicePairingResult pairingResult = await dev.DeviceInformation.Pairing.PairAsync(DevicePairingProtectionLevel.None);
+            var service = await GattDeviceService.FromIdAsync(dev.DeviceInformation.Id);
+
+            requestList.Items.Add(dev.DeviceInformation.Id);
+
+            /*var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
             int index = -1;
             if(serviceUUIDs.IndexOf(serviceUUID) == index)
             {
@@ -46,7 +55,7 @@ namespace BLEProgram
 
                 bleAddr = eventArgs.BluetoothAddress;
                 ConnectBluetoothDevice(bleAddr);
-            }
+            }*/
         }
 
         private async Task SendData(string reqData)
