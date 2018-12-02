@@ -85,6 +85,8 @@ namespace BLEProgram
             txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
             txChar = txRes.Characteristics[0];
 
+            txChar.ValueChanged += DataCallback;
+
             requestList.Items.Add("Connected!");
         }
 
@@ -98,7 +100,8 @@ namespace BLEProgram
             GattCommunicationStatus status = await gattChar.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
             requestList.Items.Add("Send : " + reqData);
 
-            txChar.ValueChanged += DataCallback;
+            txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
+            txChar = txRes.Characteristics[0];
         }
 
         private void DataCallback(GattCharacteristic sender, GattValueChangedEventArgs eventArgs)
