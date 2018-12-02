@@ -50,7 +50,7 @@ namespace BLEProgram
 
                 bleAddr = eventArgs.BluetoothAddress;
 
-                ConnectBluetoothDevice(bleAddr);
+                ConnectBluetoothDevice(eventArgs.BluetoothAddress);
             }
         }
 
@@ -76,7 +76,7 @@ namespace BLEProgram
         private async void ConnectBluetoothDevice(ulong bluetoothAddr)
         {
             var leDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddr);
-
+            Console.WriteLine("Waiting...");
             var serviceRes = await leDevice.GetGattServicesForUuidAsync(serviceUUID);
             var service = serviceRes.Services[0];
 
