@@ -27,8 +27,6 @@ namespace BLEProgram
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
 
-        GattDeviceService gattService;
-
         ulong bleAddr;
 
         public FrmMain()
@@ -38,81 +36,9 @@ namespace BLEProgram
             bleWatcher.Received += bleWatcher_Received;
         }
 
-        private async void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
+        private  void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
         {
-            // BluetoothDevice btDevice;
-            if (bleWatcher.Status != BluetoothLEAdvertisementWatcherStatus.Started) return; //Can't run this is already stopped.
-
-            bleWatcher.Stop();
-
-            var device = await BluetoothLEDevice.FromBluetoothAddressAsync(args.BluetoothAddress);
-
-            if (device.DeviceInformation.Pairing.IsPaired == false)
-            {
-
-                var handlerPairingRequested = new TypedEventHandler<DeviceInformationCustomPairing, DevicePairingRequestedEventArgs>(handlerPairingReq);
-                device.DeviceInformation.Pairing.Custom.PairingRequested += handlerPairingRequested;
-                var prslt = await device.DeviceInformation.Pairing.Custom.PairAsync(DevicePairingKinds.ProvidePin, DevicePairingProtectionLevel.None);
-                device.DeviceInformation.Pairing.Custom.PairingRequested -= handlerPairingRequested; //Don't need it anymore once paired.
-                System.Threading.Thread.Sleep(5000); //try 3 second delay.
-                device.Dispose();
-                device = await BluetoothLEDevice.FromBluetoothAddressAsync(args.BluetoothAddress);
-            }
-            //Now Paired.  Lets get all Chars       
-
-
-            var GatService = device.GetGattService(Guid.Parse("9804c436-45ed-50e2-b577-c43ccb17079d"));
-            var GattChars = GatService.GetAllCharacteristics();
-            var c1 = GattChars[0];
-            var d1 = c1.GetAllDescriptors()[0];
-            var c2 = GattChars[1];
-            var d2 = c2.GetAllDescriptors()[0];
-            byte[] datarslt1, datarslt2;
-
-            Console.WriteLine("d1 total Descs[0] :" + c1.GetAllDescriptors().Count);
-
-            Console.WriteLine("d2 total Descs[0] :" + c2.GetAllDescriptors().Count);
-
-            //online examples state I should be able to write to the "Notify" Characterisitic which is C2.
-            //I happen to know that C2 is the one I want so below I will be refering to it only.
-
-            if (c2.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
-            {
-                //we have isolated the Notify Char.
-                Console.WriteLine("Notify - Uuid: " + c2.Uuid);
-
-                IAsyncOperation<GattReadClientCharacteristicConfigurationDescriptorResult> cs2Char;
-                GattCommunicationStatus cs2;
-                try
-                {
-
-                    cs2Char = c2.ReadClientCharacteristicConfigurationDescriptorAsync();
-                    Console.WriteLine("Read Client Chars: " + cs2Char.GetResults().ClientCharacteristicConfigurationDescriptor.ToString());
-
-                    cs2 = await c2.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-                }
-                catch (Exception eee)
-                { Console.WriteLine("WriteClientChar Error:" + eee.Message); }
-
-                //c2.ValueChanged += stData_ValueChanged; //will alert us when data changes.
-                                                        //set the notify enable flag per examples
-
-
-                GattCommunicationStatus WriteRslt = 0;
-                DataWriter writer = new DataWriter();
-                writer.WriteBytes(new byte[] { 0x01 });
-                var buf = writer.DetachBuffer();
-                try
-                {
-                    Console.WriteLine("Writting Bytes: ");
-                    WriteRslt = await d2.WriteValueAsync(buf);
-                    Console.WriteLine("Result(good): " + WriteRslt.ToString());
-                }
-                catch (Exception ee)
-                { Console.WriteLine("Result(bad): " + WriteRslt.ToString() + "   Error:" + ee.Message); }
-            }
-
-            /*var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
+            var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
             int index = -1;
             if(serviceUUIDs.IndexOf(serviceUUID) == index)
             {
@@ -125,7 +51,7 @@ namespace BLEProgram
                 bleAddr = eventArgs.BluetoothAddress;
 
                 ConnectBluetoothDevice(bleAddr);
-            }*/
+            }
         }
 
         private async Task SendData(string reqData)
