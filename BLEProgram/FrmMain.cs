@@ -78,7 +78,14 @@ namespace BLEProgram
             var leDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddr);
             Console.WriteLine("Waiting...");
 
-            var serviceRes = await leDevice.GetGattServicesForUuidAsync(serviceUUID);
+            GattDeviceServicesResult result = await leDevice.GetGattServicesAsync();
+            if (result.Status == GattCommunicationStatus.Success)
+            {
+                var services = result.Services;
+                Console.WriteLine("test conn");
+            }
+
+            /*var serviceRes = await leDevice.GetGattServicesForUuidAsync(serviceUUID);
 
             Console.WriteLine("ServiceParamSending...");
 
@@ -87,7 +94,7 @@ namespace BLEProgram
             var charRes = await service.GetCharacteristicsForUuidAsync(charUUID);
             var chars = charRes.Characteristics[0];
 
-            requestList.Items.Add("Connected!");
+            requestList.Items.Add("Connected!");*/
         }
 
         private byte[] StrToByteArray(string data)
