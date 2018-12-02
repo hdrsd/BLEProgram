@@ -85,8 +85,6 @@ namespace BLEProgram
             txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
             txChar = txRes.Characteristics[0];
 
-            txChar.ValueChanged += DataCallback;
-
             requestList.Items.Add("Connected!");
         }
 
@@ -102,12 +100,12 @@ namespace BLEProgram
 
             txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
             txChar = txRes.Characteristics[0];
-        }
 
-        private void DataCallback(GattCharacteristic sender, GattValueChangedEventArgs eventArgs)
-        {
-            requestList.Items.Add("Response : " + Encoding.ASCII.GetString(eventArgs.CharacteristicValue.ToArray()));
-
+            var notifyRes = await txChar.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+            if(notifyRes == GattCommunicationStatus.Success)
+            {
+                requestList.Items.Add("Response : " + txChar.ToString());
+            }
         }
 
         private byte[] StrToByteArray(string data)
