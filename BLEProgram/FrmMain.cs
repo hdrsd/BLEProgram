@@ -37,29 +37,8 @@ namespace BLEProgram
             bleWatcher.Received += bleWatcher_Received;
         }
 
-        private async void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
+        private void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
         {
-            bool find = false;
-            var bleService = eventArgs.Advertisement.ServiceUuids;
-
-            foreach(var uuid in bleService)
-            {
-                Console.WriteLine(uuid);
-                if(uuid == NrfUuid.RX_SERVICE_UUID)
-                {
-                    bleWatcher.Stop();
-                    BluetoothLEDevice device = await BluetoothLEDevice.FromBluetoothAddressAsync(eventArgs.BluetoothAddress);
-                    gattService = device.GetGattService(NrfUuid.RX_SERVICE_UUID);
-                    find = true;
-                    break;
-                }
-            }
-
-            if (find)
-            {
-
-            }
-
             /*var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
             int index = -1;
             if(serviceUUIDs.IndexOf(serviceUUID) == index)
@@ -134,14 +113,24 @@ namespace BLEProgram
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+            /*bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
 
-            bleWatcher.Start();
+            bleWatcher.Start();*/
+
         }
 
         private async void StartBtn_Click(object sender, EventArgs e)
         {
-            await SendData(DataText.Text);
+            //await SendData(DataText.Text);
+
+            var Services = await DeviceInformation.FindAllAsync(GattDeviceService.GetDeviceSelectorFromUuid(NrfUuid.RX_SERVICE_UUID));
+            GattDeviceService Service = await GattDeviceService.FromIdAsync(Services[0].Id);
+            GattCharacteristic gattCharacteristic = Service.GetCharacteristics(NrfUuid.RX_CHAR_UUID)[0];
+
+            var writer = new DataWriter();
+            writer.WriteString("#FF00FF");
+            var res = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
+
         }
     }
 }
