@@ -21,8 +21,8 @@ namespace BLEProgram
 {
     public partial class FrmMain : Form
     {
-        Guid serviceUUID = BluetoothUuidHelper.FromShortId(0xff58);
-        Guid charUUID = BluetoothUuidHelper.FromShortId(0xffe9);
+        Guid serviceUUID = NrfUuid.RX_SERVICE_UUID;
+        Guid charUUID = NrfUuid.RX_CHAR_UUID;
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
 
@@ -39,7 +39,7 @@ namespace BLEProgram
 
         private void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
         {
-            /*var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
+            var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
             int index = -1;
             if(serviceUUIDs.IndexOf(serviceUUID) == index)
             {
@@ -51,7 +51,7 @@ namespace BLEProgram
 
                 bleAddr = eventArgs.BluetoothAddress;
                 ConnectBluetoothDevice(bleAddr);
-            }*/
+            }
         }
 
         private async Task SendData(string reqData)
@@ -113,24 +113,15 @@ namespace BLEProgram
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            /*bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+            bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
 
-            bleWatcher.Start();*/
+            bleWatcher.Start();
 
         }
 
         private async void StartBtn_Click(object sender, EventArgs e)
         {
-            //await SendData(DataText.Text);
-
-            var Services = await DeviceInformation.FindAllAsync(GattDeviceService.GetDeviceSelectorFromUuid(NrfUuid.RX_SERVICE_UUID));
-            GattDeviceService Service = await GattDeviceService.FromIdAsync(Services[0].Id);
-            GattCharacteristic gattCharacteristic = Service.GetCharacteristics(NrfUuid.RX_CHAR_UUID)[0];
-
-            var writer = new DataWriter();
-            writer.WriteString("#FF00FF");
-            var res = await gattCharacteristic.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
-
+            await SendData(DataText.Text);
         }
     }
 }
