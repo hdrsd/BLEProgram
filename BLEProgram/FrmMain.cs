@@ -33,17 +33,9 @@ namespace BLEProgram
             bleWatcher.Received += bleWatcher_Received;
         }
 
-        private async void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
+        private void bleWatcher_Received(BluetoothLEAdvertisementWatcher watcher, BluetoothLEAdvertisementReceivedEventArgs eventArgs)
         {
-
-            var dev = await BluetoothLEDevice.FromBluetoothAddressAsync(eventArgs.BluetoothAddress);
-
-            DevicePairingResult pairingResult = await dev.DeviceInformation.Pairing.PairAsync(DevicePairingProtectionLevel.None);
-            var service = await GattDeviceService.FromIdAsync(dev.DeviceInformation.Id);
-
-            requestList.Items.Add(dev.DeviceInformation.Id);
-
-            /*var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
+            var serviceUUIDs = eventArgs.Advertisement.ServiceUuids;
             int index = -1;
             if(serviceUUIDs.IndexOf(serviceUUID) == index)
             {
@@ -55,7 +47,7 @@ namespace BLEProgram
 
                 bleAddr = eventArgs.BluetoothAddress;
                 ConnectBluetoothDevice(bleAddr);
-            }*/
+            }
         }
 
         private async Task SendData(string reqData)
