@@ -45,6 +45,7 @@ namespace BLEProgram
         {
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
+
             bleWatcher.Received += bleWatcher_Received;
         }
 
@@ -81,9 +82,10 @@ namespace BLEProgram
             charRes = await gattService.GetCharacteristicsForUuidAsync(charUUID);
             gattChar = charRes.Characteristics[0];
 
-            requestList.Items.Add("Connected!");
+            txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
+            txChar = txRes.Characteristics[0];
 
-            txChar.ValueChanged += DataCallback;
+            requestList.Items.Add("Connected!");
         }
 
         private async Task SendData(string reqData)
@@ -96,8 +98,7 @@ namespace BLEProgram
             GattCommunicationStatus status = await gattChar.WriteValueAsync(writer.DetachBuffer(), GattWriteOption.WriteWithoutResponse);
             requestList.Items.Add("Send : " + reqData);
 
-            txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
-            txChar = txRes.Characteristics[0];
+            txChar.ValueChanged += DataCallback;
         }
 
         private void DataCallback(GattCharacteristic sender, GattValueChangedEventArgs eventArgs)
