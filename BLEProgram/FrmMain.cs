@@ -22,7 +22,7 @@ namespace BLEProgram
 {
     public partial class FrmMain : Form
     {
-        Guid serviceUUID = NrfUuid.RX_SERVICE_UUID;
+        Guid serviceUUID = BluetoothUuidHelper.FromShortId(0x0001);
         Guid charUUID = NrfUuid.RX_CHAR_UUID;
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
@@ -78,9 +78,11 @@ namespace BLEProgram
             var leDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddr);
             Console.WriteLine("Waiting...");
 
+            var services = leDevice.DeviceId;
+
             var serviceRes = await leDevice.GetGattServicesForUuidAsync(serviceUUID);
 
-            Console.WriteLine("ServiceParamSending...");
+            Console.WriteLine("ServiceParamSending : " + serviceRes.Services.Count);
 
             var service = serviceRes.Services[0];
 
