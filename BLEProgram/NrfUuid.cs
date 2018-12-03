@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace BLEProgram
 {
+    //nrf에서 사용하는 UUID들입니다.
     public class NrfUuid
     {
         public static Guid TX_POWER_UUID = Guid.Parse("00001804-0000-1000-8000-00805f9b34fb");
