@@ -78,6 +78,34 @@ namespace BLEProgram
             }
         }
 
+        private void ExitToolStrip_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Are you exit now?", "BLEProgram", MessageBoxButtons.YesNo);
+            switch (result)
+            {
+                case DialogResult.Yes:
+                    bleWatcher.Stop();
+                    Application.Exit();
+                    break;
+                case DialogResult.No:
+                    break;
+            }
+        }
+
+        private void FrmMain_Load(object sender, EventArgs e)
+        {
+            //FrmMain이 로드되면 bleWatcher의 스캔을 시작합니다.
+            bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+
+            bleWatcher.Start();
+
+        }
+
+        private async void StartBtn_Click(object sender, EventArgs e)
+        {
+            await SendData(DataText.Text);
+        }
+
         //연결 이후 메서드입니다.
         private async void ConnectBluetoothDevice(ulong bluetoothAddr)
         {
@@ -122,7 +150,7 @@ namespace BLEProgram
             GattCommunicationStatus gattStatus = await txChar.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
 
             //위에서 받아온 status가 success이면 콘솔에 성공을 따로 띄웁니다.(디버그용)
-            if(gattStatus == GattCommunicationStatus.Success)
+            if (gattStatus == GattCommunicationStatus.Success)
             {
                 Console.WriteLine("Success");
             }
@@ -139,40 +167,12 @@ namespace BLEProgram
         {
             List<byte> bl = new List<byte>();
             char[] convertTarget = data.ToCharArray();
-            foreach(char c in convertTarget)
+            foreach (char c in convertTarget)
             {
                 byte vb = Convert.ToByte(c);
                 bl.Add(vb);
             }
             return bl.ToArray();
-        }
-
-        private void ExitToolStrip_Click(object sender, EventArgs e)
-        {
-            DialogResult result = MessageBox.Show("Are you exit now?", "BLEProgram", MessageBoxButtons.YesNo);
-            switch (result)
-            {
-                case DialogResult.Yes:
-                    bleWatcher.Stop();
-                    Application.Exit();
-                    break;
-                case DialogResult.No:
-                    break;
-            }
-        }
-
-        private void FrmMain_Load(object sender, EventArgs e)
-        {
-            //FrmMain이 로드되면 bleWatcher의 스캔을 시작합니다.
-            bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
-
-            bleWatcher.Start();
-
-        }
-
-        private async void StartBtn_Click(object sender, EventArgs e)
-        {
-            await SendData(DataText.Text);
         }
     }
 }
