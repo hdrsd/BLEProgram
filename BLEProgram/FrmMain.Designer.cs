@@ -64,17 +64,17 @@
             // 
             // DataText
             // 
-            this.DataText.Location = new System.Drawing.Point(14, 413);
+            this.DataText.Location = new System.Drawing.Point(193, 410);
             this.DataText.Name = "DataText";
-            this.DataText.Size = new System.Drawing.Size(672, 21);
+            this.DataText.Size = new System.Drawing.Size(595, 21);
             this.DataText.TabIndex = 2;
             this.DataText.Text = "test";
             // 
             // StartBtn
             // 
-            this.StartBtn.Location = new System.Drawing.Point(692, 411);
+            this.StartBtn.Location = new System.Drawing.Point(12, 408);
             this.StartBtn.Name = "StartBtn";
-            this.StartBtn.Size = new System.Drawing.Size(96, 23);
+            this.StartBtn.Size = new System.Drawing.Size(175, 23);
             this.StartBtn.TabIndex = 3;
             this.StartBtn.Text = "Start";
             this.StartBtn.UseVisualStyleBackColor = true;

@@ -42,6 +42,8 @@ namespace BLEProgram
 
         ulong bleAddr;
 
+        bool isStarted = false;
+
         public FrmMain()
         {
             InitializeComponent();
@@ -103,22 +105,52 @@ namespace BLEProgram
 
         private async void StartBtn_Click(object sender, EventArgs e)
         {
-            await SendData(DataText.Text);
+            switch (isStarted)
+            {
+                case true:
+                    StartBtn.Text = "Start";
+                    isStarted = false;
+
+                    bleWatcher.Stop();
+                    bleDevice.Dispose();
+
+                    break;
+                case false:
+                    StartBtn.Text = "End";
+                    isStarted = true;
+
+                    bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+                    bleWatcher.Start();
+
+                    await SendData(DataText.Text);
+
+                    break;
+            }
         }
 
         //연결 이후 메서드입니다.
         private async void ConnectBluetoothDevice(ulong bluetoothAddr)
         {
-            //bluetoothAddr장치와 싱크합니다.
-            bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
+            requestList.Items.Add("Connecting...");
+            //Time out을 Try catch 구문으로 잡아냅니다.
+            try
+            {
+                //bluetoothAddr장치와 싱크합니다.
+                bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
 
-            //Gatt서비스를 싱크합니다.
-            serviceRes = await bleDevice.GetGattServicesForUuidAsync(serviceUUID);
-            gattService = serviceRes.Services[0];
+                //Gatt서비스를 싱크합니다.
+                serviceRes = await bleDevice.GetGattServicesForUuidAsync(serviceUUID);
+                gattService = serviceRes.Services[0];
 
-            //RXChar를 싱크 한 뒤 Value를 가져옵니다. 따로 변경하지 않았으나 charRes는 Rx char입니다.
-            charRes = await gattService.GetCharacteristicsForUuidAsync(charUUID);
-            gattChar = charRes.Characteristics[0];
+                //RXChar를 싱크 한 뒤 Value를 가져옵니다. 따로 변경하지 않았으나 charRes는 Rx char입니다.
+                charRes = await gattService.GetCharacteristicsForUuidAsync(charUUID);
+                gattChar = charRes.Characteristics[0];
+            }
+            catch
+            {
+                requestList.Items.Add("Connect Fail!!");
+                return;
+            }
 
             //TxChar를 싱크 한 뒤 Value를 가져옵니다.
             txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
