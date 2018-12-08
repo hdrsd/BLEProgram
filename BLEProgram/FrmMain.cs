@@ -80,7 +80,7 @@ namespace BLEProgram
 
         private void ExitToolStrip_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Are you exit now?", "BLEProgram", MessageBoxButtons.YesNo);
+            DialogResult result = MessageBox.Show("종료하시겠습니까?", "BLEProgram", MessageBoxButtons.YesNo);
             switch (result)
             {
                 case DialogResult.Yes:
@@ -152,7 +152,7 @@ namespace BLEProgram
             //위에서 받아온 status가 success이면 콘솔에 성공을 따로 띄웁니다.(디버그용)
             if (gattStatus == GattCommunicationStatus.Success)
             {
-                Console.WriteLine("Success");
+                requestList.Items.Add("ResponseByNotify : " + reqData);
             }
         }
 
