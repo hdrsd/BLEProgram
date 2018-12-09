@@ -73,9 +73,11 @@ namespace BLEProgram
                 try
                 {
                     ConnectBluetoothDevice(eventArgs.BluetoothAddress);
+
                 }catch(Exception ex)
                 {
                     MessageBox.Show("연결 실패 : " + ex.ToString());
+                    return;
                 }
             }
         }
@@ -96,14 +98,13 @@ namespace BLEProgram
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            //FrmMain이 로드되면 bleWatcher의 스캔을 시작합니다.
+            /*FrmMain이 로드되면 bleWatcher의 스캔을 시작합니다.
             bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
-
-            bleWatcher.Start();
+            bleWatcher.Start();*/
 
         }
 
-        private async void StartBtn_Click(object sender, EventArgs e)
+        private void StartBtn_Click(object sender, EventArgs e)
         {
             switch (isStarted)
             {
@@ -122,8 +123,6 @@ namespace BLEProgram
                     bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
                     bleWatcher.Start();
 
-                    await SendData(DataText.Text);
-
                     break;
             }
         }
@@ -132,25 +131,17 @@ namespace BLEProgram
         private async void ConnectBluetoothDevice(ulong bluetoothAddr)
         {
             requestList.Items.Add("Connecting...");
-            //Time out을 Try catch 구문으로 잡아냅니다.
-            try
-            {
-                //bluetoothAddr장치와 싱크합니다.
-                bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
 
-                //Gatt서비스를 싱크합니다.
-                serviceRes = await bleDevice.GetGattServicesForUuidAsync(serviceUUID);
-                gattService = serviceRes.Services[0];
+            //bluetoothAddr장치와 싱크합니다.
+            bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
 
-                //RXChar를 싱크 한 뒤 Value를 가져옵니다. 따로 변경하지 않았으나 charRes는 Rx char입니다.
-                charRes = await gattService.GetCharacteristicsForUuidAsync(charUUID);
-                gattChar = charRes.Characteristics[0];
-            }
-            catch
-            {
-                requestList.Items.Add("Connect Fail!!");
-                return;
-            }
+            //Gatt서비스를 싱크합니다.
+            serviceRes = await bleDevice.GetGattServicesForUuidAsync(serviceUUID);
+            gattService = serviceRes.Services[0];
+
+            //RXChar를 싱크 한 뒤 Value를 가져옵니다. 따로 변경하지 않았으나 charRes는 Rx char입니다.
+            charRes = await gattService.GetCharacteristicsForUuidAsync(charUUID);
+            gattChar = charRes.Characteristics[0];
 
             //TxChar를 싱크 한 뒤 Value를 가져옵니다.
             txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
@@ -160,6 +151,8 @@ namespace BLEProgram
             txChar.ValueChanged += txChar_ValueChanged;
 
             requestList.Items.Add("Connected!");
+
+            await SendData(DataText.Text);
         }
 
         private async Task SendData(string reqData)
