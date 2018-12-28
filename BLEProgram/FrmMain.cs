@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO.Ports;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -89,9 +90,25 @@ namespace BLEProgram
             //bluetoothAddr장치와 싱크합니다.
             bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bleAddr);
 
-            //Gatt서비스를 싱크합니다.
-            serviceRes = await bleDevice.GetGattServicesForUuidAsync(serviceUUID);
-            gattService = serviceRes.Services[0];
+            try
+            {
+                //Gatt서비스를 싱크합니다.
+                serviceRes = await bleDevice.GetGattServicesForUuidAsync(serviceUUID);
+                gattService = serviceRes.Services[0];
+            }catch(Exception e)
+            {
+                requestList.Items.Add("Err : Device not found. Device reboot please");
+
+                isStarted = false;
+                StartBtn.Text = "Start";
+
+                bleWatcher.ScanningMode = BluetoothLEScanningMode.Passive;
+                bleWatcher.Stop();
+
+                return;
+            }
+
+            requestList.Items.Add("Syncing...");
 
             //RXChar를 싱크 한 뒤 Value를 가져옵니다. 따로 변경하지 않았으나 charRes는 Rx char입니다.
             charRes = await gattService.GetCharacteristicsForUuidAsync(charUUID);
@@ -100,6 +117,8 @@ namespace BLEProgram
             //TxChar를 싱크 한 뒤 Value를 가져옵니다.
             txRes = await gattService.GetCharacteristicsForUuidAsync(txUUID);
             txChar = txRes.Characteristics[0];
+
+            requestList.Items.Add("Getting...");
 
             //txChar가 null이 아니므로 Event를 추가합니다.
             txChar.ValueChanged += txChar_ValueChanged;
@@ -114,6 +133,9 @@ namespace BLEProgram
             //입력 데이터를 Byte arr화 합니다.
             DataWriter writer = new DataWriter();
             byte[] sendData = StrToByteArray(reqData);
+            byte[] getData;
+
+            int i = 1;
 
             writer.WriteBytes(sendData);
 
@@ -131,7 +153,20 @@ namespace BLEProgram
             //위에서 받아온 status가 success이면 콘솔에 성공을 따로 띄웁니다.(디버그용)
             if(gattStatus == GattCommunicationStatus.Success)
             {
-                requestList.Items.Add("ResponseByNotify : " + reqData);
+                getData = StrToByteArray(reqData);
+
+                string temp = BitConverter.ToString(getData);
+                string[] tempArr = temp.Split('-');
+
+                requestList.Items.Add("GattChk : " + reqData);
+                    
+                foreach(string s in tempArr)
+                {
+                    requestList.Items.Add(i + " : " + s);
+                    i++;
+                }
+
+                i = 1;
             }
         }
 
@@ -171,15 +206,40 @@ namespace BLEProgram
         private void FrmMain_Load(object sender, EventArgs e)
         {
             //FrmMain이 로드되면 bleWatcher의 스캔을 시작합니다.
-            bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
-
-            bleWatcher.Start();
-
+            
         }
 
-        private async void StartBtn_Click(object sender, EventArgs e)
+        private void StartBtn_Click(object sender, EventArgs e)
         {
-            await SendData(DataText.Text);
+            switch (isStarted)
+            {
+                case true:
+                    StartBtn.Text = "Start";
+
+                    bleWatcher.ScanningMode = BluetoothLEScanningMode.Passive;
+                    bleWatcher.Stop();
+
+                    bleDevice.Dispose();
+
+                    bleDevice = null;
+
+                    serviceRes = null;
+                    gattService = null;
+                    charRes = null;
+                    gattChar = null;
+                    txRes = null;
+                    txChar = null;
+
+                    isStarted = false;
+                    break;
+                case false:
+                    StartBtn.Text = "Stop";
+                    bleWatcher.ScanningMode = BluetoothLEScanningMode.Active;
+
+                    bleWatcher.Start();
+                    isStarted = true;
+                    break;
+            }
         }
     }
 }
