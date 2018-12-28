@@ -25,13 +25,9 @@ namespace BLEProgram
     public partial class FrmMain : Form
     {
         //uuid들입니다.
-        /*Guid serviceUUID = NrfUuid.RX_SERVICE_UUID;
+        Guid serviceUUID = NrfUuid.RX_SERVICE_UUID;
         Guid charUUID = NrfUuid.RX_CHAR_UUID;
-        Guid txUUID = NrfUuid.TX_CHAR_UUID;*/
-
-        Guid serviceUUID = NrfUuid.UNKNOWN_SERVICE_UUID;
-        Guid charUUID = NrfUuid.UNKNOWN_CHAR_UUID;
-        Guid txUUID = NrfUuid.UNKNOWN_CHAR_UUID;
+        Guid txUUID = NrfUuid.TX_CHAR_UUID;
 
         BluetoothLEAdvertisementWatcher bleWatcher = new BluetoothLEAdvertisementWatcher();
         BluetoothLEDevice bleDevice;
