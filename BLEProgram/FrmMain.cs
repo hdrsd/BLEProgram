@@ -241,5 +241,15 @@ namespace BLEProgram
                     break;
             }
         }
+
+        private void DataText_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            await SendData(DataText.Text);
+        }
     }
 }

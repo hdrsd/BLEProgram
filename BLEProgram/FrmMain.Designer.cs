@@ -33,6 +33,7 @@
             this.requestList = new System.Windows.Forms.ListBox();
             this.DataText = new System.Windows.Forms.TextBox();
             this.StartBtn = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -66,9 +67,10 @@
             // 
             this.DataText.Location = new System.Drawing.Point(193, 410);
             this.DataText.Name = "DataText";
-            this.DataText.Size = new System.Drawing.Size(595, 21);
+            this.DataText.Size = new System.Drawing.Size(496, 21);
             this.DataText.TabIndex = 2;
             this.DataText.Text = "test";
+            this.DataText.TextChanged += new System.EventHandler(this.DataText_TextChanged);
             // 
             // StartBtn
             // 
@@ -80,11 +82,22 @@
             this.StartBtn.UseVisualStyleBackColor = true;
             this.StartBtn.Click += new System.EventHandler(this.StartBtn_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(695, 408);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(93, 23);
+            this.button1.TabIndex = 4;
+            this.button1.Text = "전송";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 438);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.StartBtn);
             this.Controls.Add(this.DataText);
             this.Controls.Add(this.requestList);
@@ -107,6 +120,7 @@
         private System.Windows.Forms.ListBox requestList;
         private System.Windows.Forms.TextBox DataText;
         private System.Windows.Forms.Button StartBtn;
+        private System.Windows.Forms.Button button1;
     }
 }
 
